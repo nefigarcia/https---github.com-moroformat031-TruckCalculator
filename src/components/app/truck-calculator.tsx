@@ -20,6 +20,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { skuData } from '@/lib/sku-data';
 import { Check, ChevronsUpDown } from 'lucide-react';
+import { Input } from '../ui/input';
 
 const formSchema = z.object({
   sku: z.string().min(1, 'SKU is required.'),

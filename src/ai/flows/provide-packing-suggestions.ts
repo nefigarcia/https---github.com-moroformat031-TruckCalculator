@@ -75,9 +75,9 @@ const packingSuggestionsPrompt = ai.definePrompt({
   1.  Calculate total accessory pallets: Sum all accessory quantities and divide by 40, rounding up.
   2.  For each unique TPO SKU, calculate the number of pallets needed. (quantity / rollsPerPallet, rounded up).
   3.  Group the TPO pallets by their length. For each length group, calculate the total number of pallets.
-  4.  For each TPO length group, determine the linear feet needed. Since pallets can be placed 2-wide and stacked 2-high, up to 4 pallets of the *same size* take up the space of one. Calculate the number of floor spots needed for each TPO size: `ceil(num_pallets_for_this_size / 4)`. The linear feet for this size is `num_floor_spots * pallet_length_in_feet`.
+  4.  For each TPO length group, determine the linear feet needed. Since pallets can be placed 2-wide and stacked 2-high, up to 4 pallets of the *same size* take up the space of one. Calculate the number of floor spots needed for each TPO size: \`ceil(num_pallets_for_this_size / 4)\`. The linear feet for this size is \`num_floor_spots * pallet_length_in_feet\`.
   5.  The total linear feet for TPO is the sum of the linear feet for each TPO size group.
-  6.  The total linear feet for accessories is `ceil(total_accessory_pallets / 4) * 4_feet`. (Assuming a 4ft pallet length for accessories).
+  6.  The total linear feet for accessories is \`ceil(total_accessory_pallets / 4) * 4_feet\`. (Assuming a 4ft pallet length for accessories).
   7.  Sum the linear feet for TPO and accessories to get the total required linear feet.
   8.  Based on the total linear feet, recommend the truck type (LTL, Half Truck, or Full Truck) and the number of trucks needed.
   9.  Provide detailed packing notes explaining the pallet calculations, space allocation, and final recommendation.
@@ -105,7 +105,7 @@ const providePackingSuggestionsFlow = ai.defineFlow(
     outputSchema: PackingSuggestionsOutputSchema,
   },
   async input => {
-    const {output} = await packingSuggestionsPrompt(input);
+    const {output} = await providePackingSuggestionsPrompt(input);
     return output!;
   }
 );
