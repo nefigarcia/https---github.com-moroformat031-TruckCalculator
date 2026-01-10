@@ -72,29 +72,13 @@ export async function getTruckSuggestion(items: Item[]): Promise<PackingSuggesti
 
     const [packingResult, estimationResult] = await Promise.all([packingPromise, estimationPromise]);
     
-    // Case 1: Both results are available, combine them.
-    if (packingResult && estimationResult) {
-      const truckOrder = ['LTL', 'Half Truck', 'Full Truck'];
-      const packingTruckIndex = truckOrder.indexOf(packingResult.truckType);
-      const estimationTruckIndex = truckOrder.indexOf(estimationResult.truckRecommendation.truckType);
-
-      const combinedTruckType = packingTruckIndex > estimationTruckIndex ? packingResult.truckType : estimationResult.truckRecommendation.truckType;
-      const combinedTrucksNeeded = Math.max(packingResult.trucksNeeded, estimationResult.truckRecommendation.numberOfTrucks);
-
-      return {
-        truckType: combinedTruckType,
-        trucksNeeded: combinedTrucksNeeded,
-        packingNotes: `${packingResult.packingNotes}\n\n--- Additional Items Estimation ---\n${estimationResult.truckRecommendation.reasoning}`,
-      };
-    }
-
-    // Case 2: Only packing suggestions are available.
-    if (packingResult) {
+    // Case 1: Only packing suggestions are available.
+    if (packingResult && !estimationResult) {
       return packingResult;
     }
 
-    // Case 3: Only estimation results are available.
-    if (estimationResult) {
+    // Case 2: Only estimation results are available.
+    if (!packingResult && estimationResult) {
       return {
         truckType: estimationResult.truckRecommendation.truckType,
         trucksNeeded: estimationResult.truckRecommendation.numberOfTrucks,
@@ -102,6 +86,25 @@ export async function getTruckSuggestion(items: Item[]): Promise<PackingSuggesti
       };
     }
     
+    // Case 3: Both results are available, combine them.
+    if (packingResult && estimationResult) {
+      const truckOrder = ['LTL', 'Half Truck', 'Full Truck'];
+      const packingTruckIndex = truckOrder.indexOf(packingResult.truckType);
+      const estimationTruckIndex = truckOrder.indexOf(estimationResult.truckRecommendation.truckType);
+
+      const combinedTruckType = packingTruckIndex > estimationTruckIndex 
+        ? packingResult.truckType 
+        : estimationResult.truckRecommendation.truckType;
+      
+      const combinedTrucksNeeded = packingResult.trucksNeeded + estimationResult.truckRecommendation.numberOfTrucks;
+
+      return {
+        truckType: combinedTruckType,
+        trucksNeeded: combinedTrucksNeeded,
+        packingNotes: `--- Detailed Packing Plan ---\n${packingResult.packingNotes}\n\n--- Additional Items Estimation ---\n${estimationResult.truckRecommendation.reasoning}`,
+      };
+    }
+
     // Case 4: No results could be generated (should not be reached if items are provided).
     throw new Error('Could not calculate truck requirements for the items provided.');
 
