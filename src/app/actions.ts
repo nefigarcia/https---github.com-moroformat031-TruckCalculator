@@ -62,15 +62,33 @@ export async function getTruckSuggestion(items: Item[]): Promise<PackingSuggesti
   }));
 
   try {
-    const packingPromise = itemsForPacking.length > 0 
-      ? providePackingSuggestions({ items: itemsForPacking }) 
-      : Promise.resolve(null);
-      
-    const estimationPromise = itemsForEstimation.length > 0 
-      ? estimateTruckRequirements({ items: itemsForEstimation }) 
-      : Promise.resolve(null);
+    // Log the inputs so we can trace problematic SKUs/quantities
+    console.info('Calculating truck suggestion. itemsWithData:', itemsWithData);
+    console.info('itemsForPacking:', itemsForPacking);
+    console.info('itemsForEstimation:', itemsForEstimation);
 
-    const [packingResult, estimationResult] = await Promise.all([packingPromise, estimationPromise]);
+    // Run each flow separately and capture their errors so we can tell which one fails.
+    let packingResult = null;
+    let estimationResult = null;
+
+    if (itemsForPacking.length > 0) {
+      try {
+        packingResult = await providePackingSuggestions({ items: itemsForPacking });
+      } catch (err) {
+        console.error('providePackingSuggestions failed. input:', itemsForPacking, 'error:', err);
+        // Re-throw the original error to preserve the message for debugging.
+        throw err;
+      }
+    }
+
+    if (itemsForEstimation.length > 0) {
+      try {
+        estimationResult = await estimateTruckRequirements({ items: itemsForEstimation });
+      } catch (err) {
+        console.error('estimateTruckRequirements failed. input:', itemsForEstimation, 'error:', err);
+        throw err;
+      }
+    }
     
     // Case 1: Only packing suggestions are available.
     if (packingResult && !estimationResult) {
