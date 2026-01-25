@@ -91,7 +91,7 @@ export function TruckCalculator() {
                           variant="outline"
                           role="combobox"
                           className={cn(
-                            "w-full justify-between",
+                            "w-full justify-between text-xs",
                             !field.value && "text-muted-foreground"
                           )}
                         >
@@ -114,6 +114,7 @@ export function TruckCalculator() {
                               <CommandItem
                                 value={sku.label}
                                 key={sku.value}
+                                className="text-xs"
                                 onSelect={() => {
                                   form.setValue("sku", sku.value);
                                   setPopoverOpen(false);
