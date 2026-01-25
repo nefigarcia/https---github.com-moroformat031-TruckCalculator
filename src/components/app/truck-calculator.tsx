@@ -48,7 +48,7 @@ export function TruckCalculator() {
 
   function addItem(data: z.infer<typeof formSchema>) {
     setItems((prevItems) => [...prevItems, data]);
-    form.reset({ sku: data.sku, quantity: 1 });
+    form.reset();
   }
 
   function removeItem(index: number) {
