@@ -98,7 +98,7 @@ export function TruckCalculator() {
                             ? ALL_SKUS.find(
                                 (sku) => sku.value === field.value
                               )?.label
-                            : ""}
+                            : "Select SKU"}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
