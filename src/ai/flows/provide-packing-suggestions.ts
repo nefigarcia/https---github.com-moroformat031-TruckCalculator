@@ -105,7 +105,7 @@ const providePackingSuggestionsFlow = ai.defineFlow(
     outputSchema: PackingSuggestionsOutputSchema,
   },
   async input => {
-    const {output} = await providePackingSuggestionsPrompt(input);
+    const {output} = await packingSuggestionsPrompt(input);
     return output!;
   }
 );
