@@ -7,8 +7,12 @@ export default function Home() {
     <main className="flex min-h-screen w-full flex-col items-center bg-background p-4 sm:p-8 md:p-12">
       <div className="w-full max-w-4xl space-y-8">
         <header className="flex items-center gap-4">
-          <div className="rounded-lg bg-primary p-2">
-            <Truck className="h-8 w-8 text-primary-foreground" />
+          <div className="rounded-lg bg-white p-2">
+            <img
+              src="https://www.kingspanroofing.com/content/dam/krw/logos/krw-logo-blue-web.svg"
+              alt="Kingspan Roofing"
+              className="h-8 w-8 object-contain"
+            />
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
             Loading Tool
