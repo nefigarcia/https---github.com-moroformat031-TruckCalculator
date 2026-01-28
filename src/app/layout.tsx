@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Truck Calculator',
+  title: 'Loading Tool',
   description: 'Calculate truck requirements for your shipment.',
 };
 

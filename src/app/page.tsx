@@ -11,7 +11,7 @@ export default function Home() {
             <Truck className="h-8 w-8 text-primary-foreground" />
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-foreground">
-            Truck Calculator
+            Loading Tool
           </h1>
         </header>
         <Card className="w-full shadow-lg">
