@@ -85,7 +85,7 @@ export function TruckCalculator() {
   // combined recommendation from the packing notes so we can show it as the summary.
   function getMixedSummary(packingNotes?: string) {
     if (!packingNotes) return 'Mixed Fleet Required';
-    // Look for a line like: "the recommendation is: 1 x Full Truck(s) and 1 x LTL."
+    // Look for a line like: "the recommendation is: 1 Full Truck(s) and 1 LTL."
     const m = packingNotes.match(/recommendation is:?\s*(.+)/i);
     if (m && m[1]) return m[1].trim().replace(/\.$/, '');
     return 'Mixed Fleet Required';
@@ -258,7 +258,7 @@ export function TruckCalculator() {
                   {suggestion.truckType === 'Mixed'
                     ? getMixedSummary(suggestion.packingNotes)
                     : suggestion.trucksNeeded > 0
-                    ? `${suggestion.trucksNeeded} × ${suggestion.truckType}`
+                    ? `${suggestion.trucksNeeded} ${suggestion.truckType}`
                     : 'No Trucks Needed'
                   }
                 </p>

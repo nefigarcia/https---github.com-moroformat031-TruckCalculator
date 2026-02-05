@@ -39,16 +39,16 @@ function getTrucksForFeet(totalLinearFeet: number): { truckType: TruckSuggestion
       return {
         truckType: 'Mixed',
         trucksNeeded,
-        summary: `${fullTrucks} x Full Truck(s) and 1 x ${overflowTruckType}`,
+        summary: `${fullTrucks} Full Truck(s) and 1 ${overflowTruckType}`,
       };
     }
   
     if (fullTrucks > 0) {
-      return { truckType: 'Full Truck', trucksNeeded: fullTrucks, summary: `${fullTrucks} x Full Truck(s)` };
+      return { truckType: 'Full Truck', trucksNeeded: fullTrucks, summary: `${fullTrucks} Full Truck(s)` };
     }
   
     if (overflowTruckType) {
-      return { truckType: overflowTruckType, trucksNeeded: 1, summary: `1 x ${overflowTruckType}` };
+      return { truckType: overflowTruckType, trucksNeeded: 1, summary: `1 ${overflowTruckType}` };
     }
   
     // Should not be reached if totalLinearFeet > 0
