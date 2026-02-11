@@ -132,6 +132,11 @@ export function TruckCalculator() {
     return ordered.map(t => ({ type: t, count: aggregated[t] }));
   }
 
+  // parsed counts for Mixed recommendations
+  const mixedParsed = (suggestion && suggestion.truckType === 'Mixed')
+    ? parseCombinedRecommendation(suggestion.packingNotes)
+    : [];
+
   return (
     <div className="space-y-8">
       <div>
@@ -275,9 +280,9 @@ export function TruckCalculator() {
                 
                 {suggestion.truckType === 'Mixed' ? (
                   <div className="flex items-center justify-center gap-4 sm:gap-8">
-                    {['LTL', 'Half Truck', 'Full Truck'].map((t, idx, arr) => {
-                      const typesForMixed = getMixedTypes(suggestion.packingNotes);
-                      const selected = typesForMixed.includes(t);
+                    {getMixedTypes(suggestion.packingNotes).map((t, idx, arr) => {
+                      const parsedEntry = mixedParsed.find(p => p.type === t);
+                      const selected = true; // list contains only recommended types
 
                       return (
                         <div key={t} className="flex items-center gap-4">
@@ -290,13 +295,12 @@ export function TruckCalculator() {
                               )}
                             />
                             <div className={cn(
-                              'px-4 py-1 rounded-full border text-xs font-semibold whitespace-nowrap',
+                              'px-4 py-1 rounded-full border text-sm font-semibold whitespace-nowrap flex items-center justify-center',
                               selected ? 'border-primary text-primary bg-white shadow-sm' : 'border-transparent text-muted-foreground/60'
                             )}>
-                              {t}
+                              {parsedEntry ? `${parsedEntry.count} ${t}` : t}
                             </div>
                           </div>
-                          {/* Show the plus sign between items, but only if they are part of the reference sequence */}
                           {idx < arr.length - 1 && <Plus className="h-6 w-6 text-muted-foreground/30 mt-[-24px]" />}
                         </div>
                       );
@@ -314,14 +318,9 @@ export function TruckCalculator() {
                   </div>
                 )}
 
-                <p className="text-2xl font-extrabold text-foreground text-center">
-                  {suggestion.truckType === 'Mixed'
-                    ? getMixedSummary(suggestion.packingNotes)
-                    : suggestion.trucksNeeded > 0
-                    ? `${suggestion.trucksNeeded} × ${suggestion.truckType}`
-                    : 'No Trucks Needed'
-                  }
-                </p>
+                {/* concise textual summary for mixed recommendations (logic-only change) */}
+               
+
                 {suggestion.truckType === 'Mixed' && (
                   <p className="text-sm text-muted-foreground italic">See AI Packing Notes for logistics details.</p>
                 )}
