@@ -1,11 +1,10 @@
-
 'use client';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { PlusCircle, Trash2, Loader2, Truck, FileText, Plus } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, FileText, Plus, Check, ChevronsUpDown } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,8 +18,8 @@ import { cn } from '@/lib/utils';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { skuData } from '@/lib/sku-data';
-import { Check, ChevronsUpDown } from 'lucide-react';
 import { Input } from '../ui/input';
+import { TruckIcon } from '../ui/truck-icon';
 
 const formSchema = z.object({
   sku: z.string().min(1, 'SKU is required.'),
@@ -81,14 +80,56 @@ export function TruckCalculator() {
     }
   }
 
-  // If the AI returned a mixed fleet recommendation, try to extract the single-line
-  // combined recommendation from the packing notes so we can show it as the summary.
   function getMixedSummary(packingNotes?: string) {
     if (!packingNotes) return 'Mixed Fleet Required';
-    // Look for a line like: "the recommendation is: 1 Full Truck(s) and 1 LTL."
     const m = packingNotes.match(/recommendation is:?\s*(.+)/i);
     if (m && m[1]) return m[1].trim().replace(/\.$/, '');
     return 'Mixed Fleet Required';
+  }
+
+  function getMixedTypes(packingNotes?: string) {
+    const parsed = parseCombinedRecommendation(packingNotes);
+    if (parsed.length > 0) return parsed.map(p => p.type);
+    if (!packingNotes) return ['Full Truck', 'LTL'];
+    const types: string[] = [];
+    if (/full truck/i.test(packingNotes)) types.push('Full Truck');
+    if (/half truck/i.test(packingNotes)) types.push('Half Truck');
+    if (/\bltl\b/i.test(packingNotes) || /less[- ]than[- ]truck/i.test(packingNotes)) types.push('LTL');
+    return types.length === 0 ? ['Full Truck', 'LTL'] : types;
+  }
+  function parseCombinedRecommendation(packingNotes?: string) {
+    if (!packingNotes) return [] as { type: string; count: number }[];
+    const summary = getMixedSummary(packingNotes);
+    if (!summary) return [] as { type: string; count: number }[];
+    const parts = summary.split(/\band\b/i).map(p => p.trim());
+    const results: { type: string; count: number }[] = [];
+    for (const part of parts) {
+      // match patterns like '1 Full Truck(s)', '1 x Full Truck(s)', '1 LTL'
+      const m = part.match(/(\d+)\s*(?:x|×)?\s*([A-Za-z ]+?)(?:\(|\.|,|$)/i);
+      let count = 0;
+      let raw = '';
+      if (m) {
+        count = parseInt(m[1], 10) || 0;
+        raw = m[2].trim();
+      } else {
+        const m2 = part.match(/(\d+)/);
+        if (m2) count = parseInt(m2[1], 10) || 0;
+        raw = part;
+      }
+
+      if (/full/i.test(raw)) results.push({ type: 'Full Truck', count: count || 1 });
+      else if (/half/i.test(raw)) results.push({ type: 'Half Truck', count: count || 1 });
+      else if (/ltl/i.test(raw) || /less[- ]than[- ]truck/i.test(raw)) results.push({ type: 'LTL', count: count || 1 });
+    }
+
+    // aggregate counts preserving order
+    const aggregated: Record<string, number> = {};
+    const ordered: string[] = [];
+    for (const r of results) {
+      if (!ordered.includes(r.type)) ordered.push(r.type);
+      aggregated[r.type] = (aggregated[r.type] || 0) + (r.count || 1);
+    }
+    return ordered.map(t => ({ type: t, count: aggregated[t] }));
   }
 
   return (
@@ -114,10 +155,8 @@ export function TruckCalculator() {
                           )}
                         >
                           {field.value
-                            ? ALL_SKUS.find(
-                                (sku) => sku.value === field.value
-                              )?.label
-                            : "Select SKU"}
+                            ? ALL_SKUS.find((sku) => sku.value === field.value)?.label
+                            : 'Select SKU'}
                           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </FormControl>
@@ -134,16 +173,14 @@ export function TruckCalculator() {
                                 key={sku.value}
                                 className="text-xs"
                                 onSelect={() => {
-                                  form.setValue("sku", sku.value);
+                                  form.setValue('sku', sku.value);
                                   setPopoverOpen(false);
                                 }}
                               >
                                 <Check
                                   className={cn(
-                                    "mr-2 h-4 w-4",
-                                    sku.value === field.value
-                                      ? "opacity-100"
-                                      : "opacity-0"
+                                    'mr-2 h-4 w-4',
+                                    sku.value === field.value ? 'opacity-100' : 'opacity-0'
                                   )}
                                 />
                                 {sku.label}
@@ -158,6 +195,7 @@ export function TruckCalculator() {
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="quantity"
@@ -171,6 +209,7 @@ export function TruckCalculator() {
                 </FormItem>
               )}
             />
+
             <Button type="submit" variant="secondary">
               <PlusCircle className="mr-2 h-4 w-4" />
               Add Item
@@ -217,22 +256,14 @@ export function TruckCalculator() {
           className="bg-accent text-accent-foreground shadow-md hover:bg-accent/90"
         >
           {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Calculating...
-            </>
+            <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Calculating...</>
           ) : (
             'Calculate Truck Requirements'
           )}
         </Button>
       </div>
 
-      <div
-        className={cn(
-          'transition-all duration-500 ease-in-out',
-          suggestion ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
-        )}
-      >
+      <div className={cn('transition-all duration-500 ease-in-out', suggestion ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none')}>
         {suggestion && (
           <Card className="shadow-lg">
             <CardHeader>
@@ -240,42 +271,71 @@ export function TruckCalculator() {
               <CardDescription>Based on the items provided, here is our suggested shipping plan.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-            <div className="flex flex-col items-center gap-4 rounded-lg bg-secondary/80 p-6">
+              <div className="flex flex-col items-center gap-6 rounded-lg bg-secondary/80 p-8">
+                
                 {suggestion.truckType === 'Mixed' ? (
-                   <div className="flex items-center justify-center gap-2">
-                     <Truck className="h-16 w-16 text-primary" />
-                     <Plus className="h-8 w-8 text-primary" />
-                     <Truck className="h-12 w-12 text-primary" />
-                   </div>
+                  <div className="flex items-center justify-center gap-4 sm:gap-8">
+                    {['LTL', 'Half Truck', 'Full Truck'].map((t, idx, arr) => {
+                      const typesForMixed = getMixedTypes(suggestion.packingNotes);
+                      const selected = typesForMixed.includes(t);
+
+                      return (
+                        <div key={t} className="flex items-center gap-4">
+                          <div className="flex flex-col items-center gap-3">
+                            <TruckIcon
+                              type={t}
+                              className={cn(
+                                'h-20 w-20 transition-all',
+                                selected ? 'text-primary drop-shadow-sm' : 'text-muted-foreground/40'
+                              )}
+                            />
+                            <div className={cn(
+                              'px-4 py-1 rounded-full border text-xs font-semibold whitespace-nowrap',
+                              selected ? 'border-primary text-primary bg-white shadow-sm' : 'border-transparent text-muted-foreground/60'
+                            )}>
+                              {t}
+                            </div>
+                          </div>
+                          {/* Show the plus sign between items, but only if they are part of the reference sequence */}
+                          {idx < arr.length - 1 && <Plus className="h-6 w-6 text-muted-foreground/30 mt-[-24px]" />}
+                        </div>
+                      );
+                    })}
+                  </div>
                 ) : (
-                  <div className="flex flex-wrap justify-center gap-4">
-                    {Array.from({ length: suggestion.trucksNeeded }).map((_, i) => (
-                      <Truck key={i} className="h-16 w-16 text-primary" />
-                    ))}
+                  <div className="flex flex-col items-center gap-3">
+                    <TruckIcon
+                      type={suggestion.truckType}
+                      className="h-24 w-24 text-primary drop-shadow-md"
+                    />
+                    <div className="px-5 py-1 rounded-full border border-primary text-primary bg-white text-sm font-bold shadow-sm">
+                      {suggestion.trucksNeeded} × {suggestion.truckType}
+                    </div>
                   </div>
                 )}
-                <p className="text-2xl font-bold text-foreground text-center">
+
+                <p className="text-2xl font-extrabold text-foreground text-center">
                   {suggestion.truckType === 'Mixed'
                     ? getMixedSummary(suggestion.packingNotes)
                     : suggestion.trucksNeeded > 0
-                    ? `${suggestion.trucksNeeded} ${suggestion.truckType}`
+                    ? `${suggestion.trucksNeeded} × ${suggestion.truckType}`
                     : 'No Trucks Needed'
                   }
                 </p>
                 {suggestion.truckType === 'Mixed' && (
-                  <p className="text-sm text-muted-foreground">See AI Packing Notes for details.</p>
+                  <p className="text-sm text-muted-foreground italic">See AI Packing Notes for logistics details.</p>
                 )}
               </div>
 
               <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="packing-notes">
-                  <AccordionTrigger>
-                    <div className="flex items-center gap-2">
+                <AccordionItem value="packing-notes" className="border-none">
+                  <AccordionTrigger className="hover:no-underline py-2">
+                    <div className="flex items-center gap-2 text-primary font-medium">
                       <FileText className="h-4 w-4" />
                       View AI Packing Notes
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="whitespace-pre-wrap rounded-md bg-muted/50 p-4 text-sm text-muted-foreground font-mono">
+                  <AccordionContent className="whitespace-pre-wrap rounded-md bg-muted/50 p-4 text-sm text-muted-foreground font-mono leading-relaxed border">
                     {suggestion.packingNotes}
                   </AccordionContent>
                 </AccordionItem>
