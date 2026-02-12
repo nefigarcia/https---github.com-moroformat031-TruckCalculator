@@ -137,6 +137,37 @@ export function TruckCalculator() {
     ? parseCombinedRecommendation(suggestion.packingNotes)
     : [];
 
+  // truck capacities (linear feet)
+  const TRUCK_CAPACITY: Record<string, number> = {
+    'Full Truck': 48,
+    'Half Truck': 24,
+    'LTL': 14,
+  };
+
+  // compute per-type allocation (per truck) and occupancy percent
+  const allocation: Record<string, { perTruckFeet: number; occupancy: number }> = {};
+  if (suggestion) {
+    const totalFeet = suggestion.linearFeet || 0;
+    if (suggestion.truckType === 'Mixed') {
+      const entries = mixedParsed.length > 0 ? mixedParsed : [];
+      const totalCapacity = entries.reduce((s, e) => s + (e.count * (TRUCK_CAPACITY[e.type] || 0)), 0);
+      for (const e of entries) {
+        const cap = TRUCK_CAPACITY[e.type] || 48;
+        const shareTotal = totalCapacity > 0 ? (e.count * cap) / totalCapacity : 0;
+        const assignedTotalFeet = totalFeet * shareTotal;
+        const perTruckFeet = e.count > 0 ? (assignedTotalFeet / e.count) : 0;
+        const occupancy = cap > 0 ? Math.min(1, perTruckFeet / cap) : 0;
+        allocation[e.type] = { perTruckFeet, occupancy };
+      }
+    } else {
+      // single-type suggestion: distribute evenly across trucksNeeded
+      const cap = TRUCK_CAPACITY[suggestion.truckType] || 48;
+      const perTruckFeet = suggestion.trucksNeeded > 0 ? (totalFeet / suggestion.trucksNeeded) : 0;
+      const occupancy = cap > 0 ? Math.min(1, perTruckFeet / cap) : 0;
+      allocation[suggestion.truckType] = { perTruckFeet, occupancy };
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -294,11 +325,24 @@ export function TruckCalculator() {
                                 selected ? 'text-primary drop-shadow-sm' : 'text-muted-foreground/40'
                               )}
                             />
-                            <div className={cn(
-                              'px-4 py-1 rounded-full border text-sm font-semibold whitespace-nowrap flex items-center justify-center',
-                              selected ? 'border-primary text-primary bg-white shadow-sm' : 'border-transparent text-muted-foreground/60'
-                            )}>
-                              {parsedEntry ? `${parsedEntry.count} ${t}` : t}
+                            <div className="flex flex-col items-center">
+                              <div className={cn(
+                                'px-4 py-1 rounded-full border text-sm font-semibold whitespace-nowrap flex items-center justify-center',
+                                selected ? 'border-primary text-primary bg-white shadow-sm' : 'border-transparent text-muted-foreground/60'
+                              )}>
+                                {parsedEntry ? `${parsedEntry.count} ${t}` : t}
+                              </div>
+                              {/* occupancy bar */}
+                              <div className="mt-2 w-28 h-2 bg-muted rounded overflow-hidden">
+                                <div
+                                  className="h-2 bg-slate-300"
+                                  style={{ width: allocation[t] ? `${Math.round(allocation[t].occupancy * 100)}%` : '0%', transition: 'width 800ms ease' }}
+                                />
+                              </div>
+                              {/* feet label */}
+                              <div className="text-xs text-muted-foreground mt-1">
+                                {allocation[t] ? `${allocation[t].perTruckFeet.toFixed(1)} ft` : ''}
+                              </div>
                             </div>
                           </div>
                           {idx < arr.length - 1 && <Plus className="h-6 w-6 text-muted-foreground/30 mt-[-24px]" />}

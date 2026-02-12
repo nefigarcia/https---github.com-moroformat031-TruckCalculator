@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 interface TruckIconProps {
   type: 'LTL' | 'Half Truck' | 'Full Truck' | 'Mixed' | string;
   className?: string;
+  occupancy?: number; // 0..1
 }
 
 export function TruckIcon({ type, className }: TruckIconProps) {
@@ -29,6 +30,8 @@ export function TruckIcon({ type, className }: TruckIconProps) {
           // Smaller LTL Box
           <>
             <rect x="40" y="24" width="55" height="21" fill="white" />
+            {/* occupancy bar for LTL: overlay grey rect width based on occupancy prop */}
+            {/* occupancy handled by outer code via className width or via prop; default empty here */}
             <line x1="48" y1="30" x2="58" y2="30" strokeOpacity="0.3" strokeWidth="2" />
             <line x1="48" y1="35" x2="65" y2="35" strokeOpacity="0.3" strokeWidth="2" />
             <line x1="65" y1="30" x2="85" y2="30" strokeOpacity="0.3" strokeWidth="2" />
@@ -37,12 +40,12 @@ export function TruckIcon({ type, className }: TruckIconProps) {
           // Larger Semi Trailer
           <>
             <rect x="40" y="20" width="65" height="25" fill="white" />
-            {/* Cargo Fill Logic */}
+            {/* Cargo occupancy overlay will be injected by parent by drawing a rect with desired width via a group */}
             {type === 'Half Truck' && (
-              <rect x="40" y="20" width="32" height="25" fill="#94a3b8" stroke="none" />
+              <rect x="40" y="20" width="32" height="25" fill="#E6EEF8" stroke="none" />
             )}
             {type === 'Full Truck' && (
-              <rect x="40" y="20" width="65" height="25" fill="#94a3b8" stroke="none" />
+              <rect x="40" y="20" width="65" height="25" fill="#E6EEF8" stroke="none" />
             )}
           </>
         )}
