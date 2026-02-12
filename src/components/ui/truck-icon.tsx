@@ -14,7 +14,7 @@ export function TruckIcon({ type, className }: TruckIconProps) {
       viewBox="0 0 120 60"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("h-16 w-16", className)}
+      className={cn("h-20 w-20", className)}
     >
       {/* 1. THE CABIN (Identical across all types) */}
       <g stroke={strokeColor} strokeWidth="3" strokeLinejoin="round">

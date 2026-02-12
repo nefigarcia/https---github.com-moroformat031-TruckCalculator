@@ -290,7 +290,7 @@ export function TruckCalculator() {
                             <TruckIcon
                               type={t}
                               className={cn(
-                                'h-20 w-20 transition-all',
+                                'h-32 w-32 transition-all',
                                 selected ? 'text-primary drop-shadow-sm' : 'text-muted-foreground/40'
                               )}
                             />
@@ -310,7 +310,7 @@ export function TruckCalculator() {
                   <div className="flex flex-col items-center gap-3">
                     <TruckIcon
                       type={suggestion.truckType}
-                      className="h-24 w-24 text-primary drop-shadow-md"
+                      className="h-48 w-48 text-primary drop-shadow-md"
                     />
                     <div className="px-5 py-1 rounded-full border border-primary text-primary bg-white text-sm font-bold shadow-sm">
                       {suggestion.trucksNeeded} × {suggestion.truckType}
