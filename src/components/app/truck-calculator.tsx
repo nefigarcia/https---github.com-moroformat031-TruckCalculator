@@ -322,28 +322,28 @@ export function TruckCalculator() {
                               type={t}
                               className={cn(
                                 'h-32 w-32 transition-all',
-                                selected ? 'text-primary drop-shadow-sm' : 'text-muted-foreground/40'
+                                  selected ? 'text-accent drop-shadow-sm' : 'text-muted-foreground/40'
                               )}
                             />
-                            <div className="flex flex-col items-center">
-                              <div className={cn(
-                                'px-4 py-1 rounded-full border text-sm font-semibold whitespace-nowrap flex items-center justify-center',
-                                selected ? 'border-primary text-primary bg-white shadow-sm' : 'border-transparent text-muted-foreground/60'
-                              )}>
-                                {parsedEntry ? `${parsedEntry.count} ${t}` : t}
+                              <div className="flex flex-col items-center">
+                                <div className={cn(
+                                  'px-4 py-1 rounded-full border text-sm font-semibold whitespace-nowrap flex items-center justify-center',
+                                  selected ? 'border-accent text-accent bg-white shadow-sm' : 'border-transparent text-muted-foreground/60'
+                                )}>
+                                  {parsedEntry ? `${parsedEntry.count} ${t}` : t}
+                                </div>
+                                {/* occupancy bar */}
+                                <div className="mt-2 w-28 h-2 bg-white rounded overflow-hidden">
+                                  <div
+                                    className="h-2 bg-accent"
+                                    style={{ width: allocation[t] ? `${Math.round(allocation[t].occupancy * 100)}%` : '0%', transition: 'width 800ms ease' }}
+                                  />
+                                </div>
+                                {/* feet label */}
+                                <div className="text-xs text-accent mt-1">
+                                  {allocation[t] ? `${allocation[t].perTruckFeet.toFixed(1)} ft` : ''}
+                                </div>
                               </div>
-                              {/* occupancy bar */}
-                              <div className="mt-2 w-28 h-2 bg-muted rounded overflow-hidden">
-                                <div
-                                  className="h-2 bg-slate-300"
-                                  style={{ width: allocation[t] ? `${Math.round(allocation[t].occupancy * 100)}%` : '0%', transition: 'width 800ms ease' }}
-                                />
-                              </div>
-                              {/* feet label */}
-                              <div className="text-xs text-muted-foreground mt-1">
-                                {allocation[t] ? `${allocation[t].perTruckFeet.toFixed(1)} ft` : ''}
-                              </div>
-                            </div>
                           </div>
                           {idx < arr.length - 1 && <Plus className="h-6 w-6 text-muted-foreground/30 mt-[-24px]" />}
                         </div>
@@ -354,9 +354,9 @@ export function TruckCalculator() {
                   <div className="flex flex-col items-center gap-3">
                     <TruckIcon
                       type={suggestion.truckType}
-                      className="h-48 w-48 text-primary drop-shadow-md"
+                      className="h-48 w-48 text-accent drop-shadow-md"
                     />
-                    <div className="px-5 py-1 rounded-full border border-primary text-primary bg-white text-sm font-bold shadow-sm">
+                    <div className="px-5 py-1 rounded-full border border-accent text-accent bg-white text-sm font-bold shadow-sm">
                       {suggestion.trucksNeeded} × {suggestion.truckType}
                     </div>
                   </div>
@@ -373,7 +373,7 @@ export function TruckCalculator() {
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="packing-notes" className="border-none">
                   <AccordionTrigger className="hover:no-underline py-2">
-                    <div className="flex items-center gap-2 text-primary font-medium">
+                    <div className="flex items-center gap-2 text-accent font-medium">
                       <FileText className="h-4 w-4" />
                       View AI Packing Notes
                     </div>
