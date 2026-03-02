@@ -1,19 +1,95 @@
-
 export type SkuData = {
   [sku: string]: {
     description: string;
-    category: 'TPO' | 'Accessory';
+    category: 'TPO' | 'Accessory' | 'ISO';
     weightLbs?: number;
     lengthInches?: number;
     widthInches?: number;
     heightInches?: number;
     rollsPerPallet?: number; // For TPO
     qtyPerPallet?: number; // For Accessories
+    boardsPerPallet?: number; // For ISO
     palletLength?: number;
   };
 };
 
 export const skuData: SkuData = {
+    // TPO
+    '600000001001': { description: 'TPO 045 Membrane 5\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 1136, palletLength: 5 },
+    '600000001002': { description: 'TPO 045 Membrane 6\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 1689.6, palletLength: 6 },
+    '600000001003': { description: 'TPO 045 Membrane 8\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 1792, palletLength: 8 },
+    '600000001004': { description: 'TPO 045 Membrane 10\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 2272, palletLength: 10 },
+    '600000001005': { description: 'TPO 045 Membrane 12\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 2928, palletLength: 12 },
+    '600000001006': { description: 'TPO 060 Membrane 5\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 1424, palletLength: 5 },
+    '600000001007': { description: 'TPO 060 Membrane 6\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 1728, palletLength: 6 },
+    '600000001008': { description: 'TPO 060 Membrane 8\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 2323.2, palletLength: 8 },
+    '600000001009': { description: 'TPO 060 Membrane 10\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 2856, palletLength: 10 },
+    '600000001010': { description: 'TPO 060 Membrane 12\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 3436.8, palletLength: 12 },
+    '600000001011': { description: 'TPO 080 Membrane 5\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 980, palletLength: 5 },
+    '600000001012': { description: 'TPO 080 Membrane 6\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 1766.4, palletLength: 6 },
+    '600000001013': { description: 'TPO 080 Membrane 8\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 1571.2, palletLength: 8 },
+    '600000001014': { description: 'TPO 080 Membrane 10\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 1964, palletLength: 10 },
+    '600000001015': { description: 'TPO 080 Membrane 12\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 3532.8, palletLength: 12 },
+
+    // ISO GF 4' x 4'
+    '600000001063': { description: 'ISO GF 1.00" 4\' x 4\'', category: 'ISO', boardsPerPallet: 48, weightLbs: 214.272, palletLength: 4 },
+    '600000001064': { description: 'ISO GF 1.10" 4\' x 4\'', category: 'ISO', boardsPerPallet: 44, weightLbs: 213.856, palletLength: 4 },
+    '600000001065': { description: 'ISO GF 1.20" 4\' x 4\'', category: 'ISO', boardsPerPallet: 40, weightLbs: 198.208, palletLength: 4 },
+    '600000001067': { description: 'ISO GF 1.30" 4\' x 4\'', category: 'ISO', boardsPerPallet: 37, weightLbs: 192.64, palletLength: 4 },
+    '600000001068': { description: 'ISO GF 1.40" 4\' x 4\'', category: 'ISO', boardsPerPallet: 34, weightLbs: 184.832, palletLength: 4 },
+    '600000001069': { description: 'ISO GF 1.50" 4\' x 4\'', category: 'ISO', boardsPerPallet: 32, weightLbs: 181.76, palletLength: 4 },
+    '600000001070': { description: 'ISO GF 1.60" 4\' x 4\'', category: 'ISO', boardsPerPallet: 30, weightLbs: 177.408, palletLength: 4 },
+    '600000001071': { description: 'ISO GF 1.70" 4\' x 4\'', category: 'ISO', boardsPerPallet: 28, weightLbs: 178.848, palletLength: 4 },
+    '600000001072': { description: 'ISO GF 1.75" 4\' x 4\'', category: 'ISO', boardsPerPallet: 27, weightLbs: 182.304, palletLength: 4 },
+    '600000001073': { description: 'ISO GF 1.80" 4\' x 4\'', category: 'ISO', boardsPerPallet: 27, weightLbs: 172.4, palletLength: 4 },
+    '600000001074': { description: 'ISO GF 1.90" 4\' x 4\'', category: 'ISO', boardsPerPallet: 25, weightLbs: 172.416, palletLength: 4 },
+    '600000001075': { description: 'ISO GF 2.00" 4\' x 4\'', category: 'ISO', boardsPerPallet: 24, weightLbs: 171.648, palletLength: 4 },
+    '600000001076': { description: 'ISO GF 2.10" 4\' x 4\'', category: 'ISO', boardsPerPallet: 23, weightLbs: 162.624, palletLength: 4 },
+    '600000001077': { description: 'ISO GF 2.20" 4\' x 4\'', category: 'ISO', boardsPerPallet: 22, weightLbs: 160.272, palletLength: 4 },
+    '600000001078': { description: 'ISO GF 2.30" 4\' x 4\'', category: 'ISO', boardsPerPallet: 21, weightLbs: 166.08, palletLength: 4 },
+    '600000001079': { description: 'ISO GF 2.40" 4\' x 4\'', category: 'ISO', boardsPerPallet: 20, weightLbs: 162.944, palletLength: 4 },
+    '600000001080': { description: 'ISO GF 2.50" 4\' x 4\'', category: 'ISO', boardsPerPallet: 19, weightLbs: 168.416, palletLength: 4 },
+    '600000001081': { description: 'ISO GF 2.60" 4\' x 4\'', category: 'ISO', boardsPerPallet: 18, weightLbs: 155.232, palletLength: 4 },
+    '600000001082': { description: 'ISO GF 2.70" 4\' x 4\'', category: 'ISO', boardsPerPallet: 18, weightLbs: 160.208, palletLength: 4 },
+    '600000001083': { description: 'ISO GF 2.80" 4\' x 4\'', category: 'ISO', boardsPerPallet: 17, weightLbs: 155.136, palletLength: 4 },
+    '600000001084': { description: 'ISO GF 2.90" 4\' x 4\'', category: 'ISO', boardsPerPallet: 17, weightLbs: 155.136, palletLength: 4 },
+    '600000001085': { description: 'ISO GF 3.00" 4\' x 4\'', category: 'ISO', boardsPerPallet: 16, weightLbs: 153.856, palletLength: 4 },
+    '600000001086': { description: 'ISO GF 3.10" 4\' x 4\'', category: 'ISO', boardsPerPallet: 15, weightLbs: 147.616, palletLength: 4 },
+    '600000001087': { description: 'ISO GF 3.20" 4\' x 4\'', category: 'ISO', boardsPerPallet: 15, weightLbs: 151.424, palletLength: 4 },
+    '600000001088': { description: 'ISO GF 3.25" 4\' x 4\'', category: 'ISO', boardsPerPallet: 15, weightLbs: 142.464, palletLength: 4 },
+    '600000001089': { description: 'ISO GF 3.30" 4\' x 4\'', category: 'ISO', boardsPerPallet: 15, weightLbs: 144.256, palletLength: 4 },
+    '600000001090': { description: 'ISO GF 3.40" 4\' x 4\'', category: 'ISO', boardsPerPallet: 14, weightLbs: 147.888, palletLength: 4 },
+    '600000001091': { description: 'ISO GF 3.50" 4\' x 4\'', category: 'ISO', boardsPerPallet: 14, weightLbs: 151.632, palletLength: 4 },
+    '600000001092': { description: 'ISO GF 3.60" 4\' x 4\'', category: 'ISO', boardsPerPallet: 13, weightLbs: 143.232, palletLength: 4 },
+    '600000001093': { description: 'ISO GF 3.70" 4\' x 4\'', category: 'ISO', boardsPerPallet: 13, weightLbs: 146.688, palletLength: 4 },
+    '600000001095': { description: 'ISO GF 3.80" 4\' x 4\'', category: 'ISO', boardsPerPallet: 13, weightLbs: 149.952, palletLength: 4 },
+    '600000001096': { description: 'ISO GF 3.90" 4\' x 4\'', category: 'ISO', boardsPerPallet: 12, weightLbs: 153.408, palletLength: 4 },
+    '600000001097': { description: 'ISO GF 4.00" 4\' x 4\'', category: 'ISO', boardsPerPallet: 12, weightLbs: 143.616, palletLength: 4 },
+    '600000001098': { description: 'ISO GF 4.10" 4\' x 4\'', category: 'ISO', boardsPerPallet: 12, weightLbs: 131.648, palletLength: 4 },
+    '600000001099': { description: 'ISO GF 4.20" 4\' x 4\'', category: 'ISO', boardsPerPallet: 11, weightLbs: 131.648, palletLength: 4 },
+    '600000001100': { description: 'ISO GF 4.30" 4\' x 4\'', category: 'ISO', boardsPerPallet: 11, weightLbs: 131.648, palletLength: 4 },
+    '600000001101': { description: 'ISO GF 4.40" 4\' x 4\'', category: 'ISO', boardsPerPallet: 11, weightLbs: 119.68, palletLength: 4 },
+    '600000001102': { description: 'ISO GF 4.50" 4\' x 4\'', category: 'ISO', boardsPerPallet: 11, weightLbs: 138.24, palletLength: 4 },
+
+    // ISO CG 4' x 4'
+    '600000001109': { description: 'ISO CG 1.00" 4\' x 4\'', category: 'ISO', boardsPerPallet: 48, weightLbs: 214.272, palletLength: 4 },
+    '600000001110': { description: 'ISO CG 1.50" 4\' x 4\'', category: 'ISO', boardsPerPallet: 32, weightLbs: 181.76, palletLength: 4 },
+    '600000001111': { description: 'ISO CG 1.70" 4\' x 4\'', category: 'ISO', boardsPerPallet: 28, weightLbs: 178.848, palletLength: 4 },
+    '600000001112': { description: 'ISO CG 1.75" 4\' x 4\'', category: 'ISO', boardsPerPallet: 27, weightLbs: 182.304, palletLength: 4 },
+    '600000001113': { description: 'ISO CG 1.80" 4\' x 4\'', category: 'ISO', boardsPerPallet: 27, weightLbs: 172.4, palletLength: 4 },
+    '600000001115': { description: 'ISO CG 2.00" 4\' x 4\'', category: 'ISO', boardsPerPallet: 24, weightLbs: 171.648, palletLength: 4 },
+    '600000001116': { description: 'ISO CG 2.10" 4\' x 4\'', category: 'ISO', boardsPerPallet: 23, weightLbs: 162.624, palletLength: 4 },
+    '600000001117': { description: 'ISO CG 2.20" 4\' x 4\'', category: 'ISO', boardsPerPallet: 22, weightLbs: 160.272, palletLength: 4 },
+    '600000001118': { description: 'ISO CG 2.30" 4\' x 4\'', category: 'ISO', boardsPerPallet: 21, weightLbs: 166.08, palletLength: 4 },
+    '600000001119': { description: 'ISO CG 2.40" 4\' x 4\'', category: 'ISO', boardsPerPallet: 20, weightLbs: 162.944, palletLength: 4 },
+    '600000001120': { description: 'ISO CG 2.50" 4\' x 4\'', category: 'ISO', boardsPerPallet: 19, weightLbs: 168.416, palletLength: 4 },
+    '600000001121': { description: 'ISO CG 2.60" 4\' x 4\'', category: 'ISO', boardsPerPallet: 18, weightLbs: 155.232, palletLength: 4 },
+    '600000001122': { description: 'ISO CG 2.70" 4\' x 4\'', category: 'ISO', boardsPerPallet: 18, weightLbs: 160.208, palletLength: 4 },
+    '600000001123': { description: 'ISO CG 2.80" 4\' x 4\'', category: 'ISO', boardsPerPallet: 17, weightLbs: 155.136, palletLength: 4 },
+    '600000001124': { description: 'ISO CG 2.90" 4\' x 4\'', category: 'ISO', boardsPerPallet: 17, weightLbs: 155.136, palletLength: 4 },
+    '600000001125': { description: 'ISO CG 3.00" 4\' x 4\'', category: 'ISO', boardsPerPallet: 16, weightLbs: 153.856, palletLength: 4 },
+
+    // Accessories
     '600000001051': { description: 'Primer 1 Gal Pail 6ct', category: 'Accessory', qtyPerPallet: 40, weightLbs: 44, palletLength: 4 },
     '600000001052': { description: 'TPO Membrane Cleaner 1 Gal 4/box', category: 'Accessory', qtyPerPallet: 40, weightLbs: 33, palletLength: 4 },
     '600000001041': { description: 'LVOC Sprayable Bonding Adhesive Canis', category: 'Accessory', qtyPerPallet: 40, weightLbs: 45, palletLength: 4 },
@@ -21,11 +97,6 @@ export const skuData: SkuData = {
     '600000001057': { description: 'White One-Part Pourable Sealer 2L/4ct', category: 'Accessory', qtyPerPallet: 40, weightLbs: 30, palletLength: 4 },
     '600000001042': { description: 'Low-Rise Foam Adhesive Cartridge 1500mL', category: 'Accessory', qtyPerPallet: 40, weightLbs: 12, palletLength: 4 },
     '600000001040': { description: 'TPO Membrane Bonding Adhesive 5 Gal C', category: 'Accessory', qtyPerPallet: 40, weightLbs: 39, palletLength: 4 },
-    '600000001004': { description: 'TPO 045 Membrane 10\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 225, palletLength: 10 },
-    '600000001001': { description: 'TPO 045 Membrane 5\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 113, palletLength: 5 },
-    '600000001006': { description: 'TPO 060 Membrane 5\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 150, palletLength: 5 },
-    '600000001007': { description: 'TPO 060 Membrane 6\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 180, palletLength: 6 },
-    '600000001009': { description: 'TPO 060 Membrane 10\' x 100\' White', category: 'TPO', rollsPerPallet: 8, weightLbs: 300, palletLength: 10 },
     '600000001308': { description: '#12 Fasteners 2-1/4" 1000ct', category: 'Accessory', qtyPerPallet: 40, weightLbs: 8, palletLength: 4 },
     '600000001309': { description: '#12 Fasteners 3" 1000ct', category: 'Accessory', qtyPerPallet: 40, weightLbs: 24, palletLength: 4 },
     '600000001310': { description: '#12 Fasteners 4" 1000ct', category: 'Accessory', qtyPerPallet: 40, weightLbs: 31, palletLength: 4 },

@@ -51,7 +51,6 @@ function getTrucksForFeet(totalLinearFeet: number): { truckType: TruckSuggestion
       return { truckType: overflowTruckType, trucksNeeded: 1, summary: `1 ${overflowTruckType}` };
     }
   
-    // Should not be reached if totalLinearFeet > 0
     return { truckType: 'LTL', trucksNeeded: 0, summary: 'Calculation error.' };
   }
   
@@ -82,7 +81,7 @@ export async function getTruckSuggestion(items: Item[]): Promise<TruckSuggestion
   // Items that have the necessary data for the detailed packing flow
   const itemsForPacking: PackingSuggestionsInput['items'] = itemsWithData.filter(item => 
     item.category && 
-    (item.rollsPerPallet || item.qtyPerPallet) && 
+    (item.rollsPerPallet || item.qtyPerPallet || item.boardsPerPallet) && 
     item.palletLength &&
     item.weightLbs
   ).map(item => ({ // ensure only needed properties are passed
@@ -94,6 +93,7 @@ export async function getTruckSuggestion(items: Item[]): Promise<TruckSuggestion
     palletLength: item.palletLength,
     rollsPerPallet: item.rollsPerPallet,
     qtyPerPallet: item.qtyPerPallet,
+    boardsPerPallet: item.boardsPerPallet,
   }));
 
   // Items that are missing some data and need the general estimation flow
@@ -109,11 +109,6 @@ export async function getTruckSuggestion(items: Item[]): Promise<TruckSuggestion
   }));
 
   try {
-    // Log the inputs so we can trace problematic SKUs/quantities
-    console.info('Calculating truck suggestion. itemsWithData:', itemsWithData);
-    console.info('itemsForPacking:', itemsForPacking);
-    console.info('itemsForEstimation:', itemsForEstimation);
-
     let packingResult: PackingSuggestionsOutput | null = null;
     let estimationResult: EstimateTruckRequirementsOutput | null = null;
 

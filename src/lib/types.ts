@@ -20,6 +20,7 @@ export type ItemWithData = Item & {
     heightInches?: number;
     rollsPerPallet?: number;
     qtyPerPallet?: number;
+    boardsPerPallet?: number;
     palletLength?: number;
 };
 
