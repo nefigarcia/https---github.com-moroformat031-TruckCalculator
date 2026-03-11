@@ -104,7 +104,6 @@ export function TruckCalculator() {
     const parts = summary.split(/\band\b/i).map(p => p.trim());
     const results: { type: string; count: number }[] = [];
     for (const part of parts) {
-      // match patterns like '1 Full Truck(s)', '1 x Full Truck(s)', '1 LTL'
       const m = part.match(/(\d+)\s*(?:x|×)?\s*([A-Za-z ]+?)(?:\(|\.|,|$)/i);
       let count = 0;
       let raw = '';
@@ -122,7 +121,6 @@ export function TruckCalculator() {
       else if (/ltl/i.test(raw) || /less[- ]than[- ]truck/i.test(raw)) results.push({ type: 'LTL', count: count || 1 });
     }
 
-    // aggregate counts preserving order
     const aggregated: Record<string, number> = {};
     const ordered: string[] = [];
     for (const r of results) {
@@ -132,19 +130,16 @@ export function TruckCalculator() {
     return ordered.map(t => ({ type: t, count: aggregated[t] }));
   }
 
-  // parsed counts for Mixed recommendations
   const mixedParsed = (suggestion && suggestion.truckType === 'Mixed')
     ? parseCombinedRecommendation(suggestion.packingNotes)
     : [];
 
-  // truck capacities (linear feet)
   const TRUCK_CAPACITY: Record<string, number> = {
     'Full Truck': 48,
     'Half Truck': 24,
     'LTL': 14,
   };
 
-  // compute per-type allocation (per truck) and occupancy percent
   const allocation: Record<string, { perTruckFeet: number; occupancy: number }> = {};
   if (suggestion) {
     const totalFeet = suggestion.linearFeet || 0;
@@ -160,7 +155,6 @@ export function TruckCalculator() {
         allocation[e.type] = { perTruckFeet, occupancy };
       }
     } else {
-      // single-type suggestion: distribute evenly across trucksNeeded
       const cap = TRUCK_CAPACITY[suggestion.truckType] || 48;
       const perTruckFeet = suggestion.trucksNeeded > 0 ? (totalFeet / suggestion.trucksNeeded) : 0;
       const occupancy = cap > 0 ? Math.min(1, perTruckFeet / cap) : 0;
@@ -261,6 +255,7 @@ export function TruckCalculator() {
               <TableRow>
                 <TableHead>SKU</TableHead>
                 <TableHead className="w-[100px]">Quantity</TableHead>
+                <TableHead className="w-[80px]">UM</TableHead>
                 <TableHead className="w-[50px] text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -271,6 +266,9 @@ export function TruckCalculator() {
                     {item.sku} - {skuData[item.sku]?.description}
                   </TableCell>
                   <TableCell>{item.quantity}</TableCell>
+                  <TableCell>
+                    {skuData[item.sku]?.category || 'N/A'}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -313,7 +311,7 @@ export function TruckCalculator() {
                   <div className="flex items-center justify-center gap-4 sm:gap-8">
                     {getMixedTypes(suggestion.packingNotes).map((t, idx, arr) => {
                       const parsedEntry = mixedParsed.find(p => p.type === t);
-                      const selected = true; // list contains only recommended types
+                      const selected = true;
 
                       return (
                         <div key={t} className="flex items-center gap-4">
@@ -332,14 +330,12 @@ export function TruckCalculator() {
                                 )}>
                                   {parsedEntry ? `${parsedEntry.count} ${t}` : t}
                                 </div>
-                                {/* occupancy bar */}
                                 <div className="mt-2 w-28 h-2 bg-white rounded overflow-hidden">
                                   <div
                                     className="h-2 bg-accent"
                                     style={{ width: allocation[t] ? `${Math.round(allocation[t].occupancy * 100)}%` : '0%', transition: 'width 800ms ease' }}
                                   />
                                 </div>
-                                {/* feet label */}
                                 <div className="text-xs text-accent mt-1">
                                   {allocation[t] ? `${allocation[t].perTruckFeet.toFixed(1)} ft` : ''}
                                 </div>
@@ -357,13 +353,10 @@ export function TruckCalculator() {
                       className="h-48 w-48 text-accent drop-shadow-md"
                     />
                     <div className="px-5 py-1 rounded-full border border-accent text-accent bg-white text-sm font-bold shadow-sm">
-                      {suggestion.trucksNeeded} × {suggestion.truckType}
+                      {suggestion.trucksNeeded} {suggestion.truckType}
                     </div>
                   </div>
                 )}
-
-                {/* concise textual summary for mixed recommendations (logic-only change) */}
-               
 
                 {suggestion.truckType === 'Mixed' && (
                   <p className="text-sm text-muted-foreground italic">See AI Packing Notes for logistics details.</p>
