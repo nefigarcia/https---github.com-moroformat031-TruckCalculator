@@ -173,7 +173,7 @@ export const skuData: SkuData = {
     '600000001027': { description: 'Throughwall Scuppers 2ct', category: 'Accessory', qtyPerPallet: 40, weightLbs: 11, palletLength: 4, unitOfMeasure: 'UNIT' },
     '600000001024': { description: 'TPO Pipe Boots White 1" to 6" 10ct/box', category: 'Accessory', qtyPerPallet: 40, weightLbs: 9, palletLength: 4, unitOfMeasure: 'BOX' },
     '600000001017': { description: 'TPO T-Joint Cover White 100ct', category: 'Accessory', qtyPerPallet: 40, weightLbs: 3.2, palletLength: 4, unitOfMeasure: 'BOX' },
-    '600000001016': { description: 'Flashing 060 24"x50\' URF White 1roll', category: 'Accessory', qtyPerPallet: 40, weightLbs: 56, palletLength: 4, unitOfMeasure: 'ROLL' },
+    '600000001016': { description: 'Flashing 060 24"x50\' URF White 1roll', category: 'Accessory', qtyPerPallet: 16, weightLbs: 56, palletLength: 4, unitOfMeasure: 'ROLL' },
     '600000001018': { description: 'White TPO Cover Tape URF 6" x 100\' 2/box', category: 'Accessory', qtyPerPallet: 40, weightLbs: 48, palletLength: 4, unitOfMeasure: 'BOX' },
     '600000001352': { description: 'TPO Sprayable Bonding Adhesive 6\' Hose', category: 'Accessory', qtyPerPallet: 40, weightLbs: 1, palletLength: 4, unitOfMeasure: 'UNIT' },
     '600000001353': { description: 'TPO Sprayable Bonding Adhesive 12\' Hosi', category: 'Accessory', qtyPerPallet: 40, weightLbs: 2, palletLength: 4, unitOfMeasure: 'UNIT' },

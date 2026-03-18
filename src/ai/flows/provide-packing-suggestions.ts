@@ -76,25 +76,29 @@ const packingSuggestionsPrompt = ai.definePrompt({
     - This means up to 4 pallets of the same length ISO can occupy the footprint of one pallet length.
     - Linear feet for an ISO length group: ` + "`ceil(num_pallets_for_this_length / 4) * pallet_length`" + `.
 
-  - **TPO Coated Metal**:
+  - **TPO Coated Metal (SKU 600000001029)**:
     - Shipped on 10ft pallets.
     - 10 sheets per pallet.
     - **Can be stacked 3 pallets high.**
     - **Can be placed 2 pallets wide (4ft width each).**
     - Linear feet for Metal: ` + "`ceil(total_pallets / 6) * 10`" + ` (because 3 high * 2 wide = 6 pallets per 10ft footprint).
 
-  - **Accessories**:
-    - Accessory items are consolidated onto pallets. The number of units per pallet is given by 'qtyPerPallet'.
-    - Calculate the total number of accessory pallets needed. These can be stacked 2-high and placed 2-wide.
-    - Linear feet for accessories: ` + "`ceil(total_accessory_pallets / 4) * 4`" + `. (Assuming a 4ft pallet length for accessories).
+  - **Accessories & Flashing**:
+    - Accessory items are consolidated onto pallets. The number of units per pallet is given by 'qtyPerPallet'. Pallet length is 4ft.
+    - **Exception: SKU 600000001016 (Flashing) pallets CANNOT be stacked.**
+    - Other accessory pallets can be stacked 2-high.
+    - They can be placed 2-wide.
+    - Calculate linear feet for SKU 600000001016: ` + "`ceil(pallets_1016 / 2) * 4`" + `.
+    - Calculate linear feet for other accessories: ` + "`ceil(other_accessory_pallets / 4) * 4`" + `.
 
   Calculation Steps:
   1. For each unique SKU, calculate pallets needed based on its quantity and units-per-pallet.
-  2. For Metal (SKU 600000001029), group pallets and apply 3-high, 2-wide rule on a 10ft footprint.
-  3. For TPO and ISO, group by palletLength and apply 2-high, 2-wide rules.
-  4. Sum the linear feet for all categories.
-  5. Provide detailed packing notes explaining the pallet calculations, space allocation, and total linear feet.
-  6. Based on the total linear feet, provide a *simple* truck recommendation.
+  2. For Metal (SKU 600000001029), apply the 3-high, 2-wide rule on a 10ft footprint.
+  3. For Flashing (SKU 600000001016), apply 1-high, 2-wide rule on 4ft footprint.
+  4. For TPO and ISO, group by palletLength and apply 2-high, 2-wide rules.
+  5. Sum the linear feet for all categories.
+  6. Provide detailed packing notes explaining the pallet calculations, space allocation, and total linear feet.
+  7. Based on the total linear feet, provide a *simple* truck recommendation.
 
   **Always recommend the smallest and most efficient truck type possible.**
 
