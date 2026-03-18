@@ -152,6 +152,15 @@ export function TruckCalculator() {
     }
   }
 
+  function getUMDisplay(sku: string) {
+    const data = skuData[sku];
+    if (!data) return '';
+    if (data.category === 'TPO') return 'ROLL';
+    if (data.category === 'ISO') return 'BOARD';
+    if (sku === '600000001029') return 'SHEET';
+    return '';
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -257,7 +266,7 @@ export function TruckCalculator() {
                   </TableCell>
                   <TableCell>{item.quantity}</TableCell>
                   <TableCell>
-                    {skuData[item.sku]?.unitOfMeasure || skuData[item.sku]?.category || 'N/A'}
+                    {getUMDisplay(item.sku)}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
