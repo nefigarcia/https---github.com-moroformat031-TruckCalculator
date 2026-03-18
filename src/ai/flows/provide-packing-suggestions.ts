@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -19,11 +18,11 @@ const PackingSuggestionsInputSchema = z.object({
       sku: z.string().describe('Stock keeping unit identifier'),
       quantity: z.number().int().positive().describe('Quantity of items'),
       description: z.string().optional(),
-      category: z.enum(['TPO', 'Accessory', 'ISO']).optional(),
+      category: z.enum(['TPO', 'Accessory', 'ISO', 'Metal']).optional(),
       weightLbs: z.number().optional(),
       palletLength: z.number().optional().describe('The length of the pallet in feet.'),
       rollsPerPallet: z.number().optional().describe('Number of TPO rolls per pallet.'),
-      qtyPerPallet: z.number().optional().describe('Number of accessory units per pallet.'),
+      qtyPerPallet: z.number().optional().describe('Number of units per pallet.'),
       boardsPerPallet: z.number().optional().describe('Number of ISO boards per pallet.'),
     })
   ).describe('List of items in the order.'),
@@ -67,7 +66,7 @@ const packingSuggestionsPrompt = ai.definePrompt({
     - **Crucially, different TPO sizes (lengths) cannot be stacked on top of each other in the same footprint.**
     - Pallets of the *same* TPO size can be stacked two high.
     - Since two pallets fit side-by-side (8ft total width in a 9ft truck), up to 4 pallets of the *same size* take up the space of one pallet length.
-    - Linear feet for a TPO size: \`ceil(num_pallets_for_this_size / 4) * pallet_length\`.
+    - Linear feet for a TPO size: ` + "`ceil(num_pallets_for_this_size / 4) * pallet_length`" + `.
 
   - **ISO Insulation**:
     - ISO boards are shipped on pallets. Boards per pallet is provided ('boardsPerPallet').
@@ -75,20 +74,27 @@ const packingSuggestionsPrompt = ai.definePrompt({
     - **ISO pallets can be stacked 2 high.**
     - **ISO pallets can be placed 2 wide.**
     - This means up to 4 pallets of the same length ISO can occupy the footprint of one pallet length.
-    - Linear feet for an ISO length group: \`ceil(num_pallets_for_this_length / 4) * pallet_length\`.
+    - Linear feet for an ISO length group: ` + "`ceil(num_pallets_for_this_length / 4) * pallet_length`" + `.
+
+  - **TPO Coated Metal**:
+    - Shipped on 10ft pallets.
+    - 10 sheets per pallet.
+    - **Can be stacked 3 pallets high.**
+    - **Can be placed 2 pallets wide (4ft width each).**
+    - Linear feet for Metal: ` + "`ceil(total_pallets / 6) * 10`" + ` (because 3 high * 2 wide = 6 pallets per 10ft footprint).
 
   - **Accessories**:
     - Accessory items are consolidated onto pallets. The number of units per pallet is given by 'qtyPerPallet'.
     - Calculate the total number of accessory pallets needed. These can be stacked 2-high and placed 2-wide.
-    - Linear feet for accessories: \`ceil(total_accessory_pallets / 4) * 4\`. (Assuming a 4ft pallet length for accessories).
+    - Linear feet for accessories: ` + "`ceil(total_accessory_pallets / 4) * 4`" + `. (Assuming a 4ft pallet length for accessories).
 
   Calculation Steps:
-  1. For each unique TPO SKU, calculate pallets needed and then linear feet grouped by palletLength.
-  2. For each unique ISO SKU, calculate pallets needed (\`ceil(quantity / boardsPerPallet)\`) and then linear feet grouped by palletLength.
-  3. Calculate linear feet for all accessories.
-  4. Sum the linear feet for TPO, ISO, and accessories to get the total required linear feet.
-  5. Provide detailed packing notes explaining the pallet calculations, space allocation (how many floor spots and stacks), and total linear feet.
-  6. Based on the total linear feet, provide a *simple* truck recommendation. If total linear feet < 14, 'LTL', 1 truck. If < 24, 'Half Truck', 1 truck. If <= 48, 'Full Truck', 1 truck. Otherwise, 'Full Truck' and calculate trucks needed as \`ceil(totalLinearFeet / 48)\`.
+  1. For each unique SKU, calculate pallets needed based on its quantity and units-per-pallet.
+  2. For Metal (SKU 600000001029), group pallets and apply 3-high, 2-wide rule on a 10ft footprint.
+  3. For TPO and ISO, group by palletLength and apply 2-high, 2-wide rules.
+  4. Sum the linear feet for all categories.
+  5. Provide detailed packing notes explaining the pallet calculations, space allocation, and total linear feet.
+  6. Based on the total linear feet, provide a *simple* truck recommendation.
 
   **Always recommend the smallest and most efficient truck type possible.**
 

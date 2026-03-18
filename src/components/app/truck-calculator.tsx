@@ -87,16 +87,6 @@ export function TruckCalculator() {
     return 'Mixed Fleet Required';
   }
 
-  function getMixedTypes(packingNotes?: string) {
-    const parsed = parseCombinedRecommendation(packingNotes);
-    if (parsed.length > 0) return parsed.map(p => p.type);
-    if (!packingNotes) return ['Full Truck', 'LTL'];
-    const types: string[] = [];
-    if (/full truck/i.test(packingNotes)) types.push('Full Truck');
-    if (/half truck/i.test(packingNotes)) types.push('Half Truck');
-    if (/\bltl\b/i.test(packingNotes) || /less[- ]than[- ]truck/i.test(packingNotes)) types.push('LTL');
-    return types.length === 0 ? ['Full Truck', 'LTL'] : types;
-  }
   function parseCombinedRecommendation(packingNotes?: string) {
     if (!packingNotes) return [] as { type: string; count: number }[];
     const summary = getMixedSummary(packingNotes);
@@ -255,7 +245,7 @@ export function TruckCalculator() {
               <TableRow>
                 <TableHead>SKU</TableHead>
                 <TableHead className="w-[100px]">Quantity</TableHead>
-                <TableHead className="w-[80px]">UM</TableHead>
+                <TableHead className="w-[100px]">UM</TableHead>
                 <TableHead className="w-[50px] text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -267,7 +257,7 @@ export function TruckCalculator() {
                   </TableCell>
                   <TableCell>{item.quantity}</TableCell>
                   <TableCell>
-                    {skuData[item.sku]?.category || 'N/A'}
+                    {skuData[item.sku]?.unitOfMeasure || skuData[item.sku]?.category || 'N/A'}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
@@ -309,8 +299,8 @@ export function TruckCalculator() {
                 
                 {suggestion.truckType === 'Mixed' ? (
                   <div className="flex items-center justify-center gap-4 sm:gap-8">
-                    {getMixedTypes(suggestion.packingNotes).map((t, idx, arr) => {
-                      const parsedEntry = mixedParsed.find(p => p.type === t);
+                    {mixedParsed.map((entry, idx, arr) => {
+                      const t = entry.type;
                       const selected = true;
 
                       return (
@@ -328,7 +318,7 @@ export function TruckCalculator() {
                                   'px-4 py-1 rounded-full border text-sm font-semibold whitespace-nowrap flex items-center justify-center',
                                   selected ? 'border-accent text-accent bg-white shadow-sm' : 'border-transparent text-muted-foreground/60'
                                 )}>
-                                  {parsedEntry ? `${parsedEntry.count} ${t}` : t}
+                                  {entry.count} {t}
                                 </div>
                                 <div className="mt-2 w-28 h-2 bg-white rounded overflow-hidden">
                                   <div

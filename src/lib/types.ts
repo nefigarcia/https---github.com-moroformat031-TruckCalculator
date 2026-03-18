@@ -13,7 +13,8 @@ export type TruckSuggestion = {
 
 export type ItemWithData = Item & {
     description?: string;
-    category?: 'TPO' | 'Accessory' | 'ISO';
+    category?: 'TPO' | 'Accessory' | 'ISO' | 'Metal';
+    unitOfMeasure?: string;
     weightLbs?: number;
     lengthInches?: number;
     widthInches?: number;
