@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { PlusCircle, Trash2, Loader2, FileText, Plus, Check, ChevronsUpDown } from 'lucide-react';
+import { PlusCircle, Trash2, Loader2, FileText, Plus, Check, ChevronsUpDown, Sparkles, Package, Truck as TruckLucide, Calculator, Brain } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,10 +31,23 @@ const ALL_SKUS = Object.keys(skuData).map(sku => ({
   label: `${sku} - ${skuData[sku].description}`,
 }));
 
+const LOADING_STEPS = [
+  { icon: Brain,       message: 'Thinking...' },
+  { icon: Package,     message: 'Analyzing items...' },
+  { icon: Calculator,  message: 'Crunching the numbers...' },
+  { icon: TruckLucide, message: 'Checking truck capacities...' },
+  { icon: Package,     message: 'Optimizing pallet stacking...' },
+  { icon: Calculator,  message: 'Calculating linear footage...' },
+  { icon: Brain,       message: 'Finalizing load plan...' },
+  { icon: Sparkles,    message: 'Almost ready...' },
+];
+
 export function TruckCalculator() {
   const [items, setItems] = useState<Item[]>([]);
   const [suggestion, setSuggestion] = useState<TruckSuggestion | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
+  const loadingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { toast } = useToast();
   const [popoverOpen, setPopoverOpen] = useState(false);
 
@@ -65,7 +78,13 @@ export function TruckCalculator() {
       return;
     }
     setIsLoading(true);
+    setLoadingStep(0);
     setSuggestion(null);
+
+    loadingIntervalRef.current = setInterval(() => {
+      setLoadingStep(prev => (prev + 1) % LOADING_STEPS.length);
+    }, 1800);
+
     try {
       const result = await getTruckSuggestion(items);
       setSuggestion(result);
@@ -76,6 +95,10 @@ export function TruckCalculator() {
         description: error instanceof Error ? error.message : 'An unknown error occurred.',
       });
     } finally {
+      if (loadingIntervalRef.current) {
+        clearInterval(loadingIntervalRef.current);
+        loadingIntervalRef.current = null;
+      }
       setIsLoading(false);
     }
   }
@@ -281,19 +304,56 @@ export function TruckCalculator() {
         </div>
       )}
 
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center gap-4">
         <Button
           size="lg"
           onClick={handleCalculate}
           disabled={items.length === 0 || isLoading}
-          className="bg-accent text-accent-foreground shadow-md hover:bg-accent/90"
+          className="bg-accent text-accent-foreground shadow-md hover:bg-accent/90 transition-all duration-200"
         >
           {isLoading ? (
-            <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Calculating...</>
+            <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Working on it...</>
           ) : (
-            'Calculate Truck Requirements'
+            <><Sparkles className="mr-2 h-5 w-5" />Calculate Truck Requirements</>
           )}
         </Button>
+
+        {/* Animated AI loading card */}
+        <div className={cn(
+          'w-full max-w-sm transition-all duration-500 ease-in-out overflow-hidden',
+          isLoading ? 'opacity-100 max-h-40' : 'opacity-0 max-h-0'
+        )}>
+          <div className="rounded-xl border border-accent/20 bg-accent/5 px-5 py-4 flex items-center gap-4 shadow-sm">
+            {(() => {
+              const step = LOADING_STEPS[loadingStep];
+              const Icon = step.icon;
+              return (
+                <>
+                  <div className="relative shrink-0" key={`icon-${loadingStep}`}>
+                    <div className="absolute inset-0 rounded-full bg-accent/20 animate-ping" />
+                    <div className="relative rounded-full bg-accent/10 p-2">
+                      <Icon className="h-5 w-5 text-accent" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <p key={`msg-${loadingStep}`} className="loading-step-enter text-sm font-medium text-accent">
+                      {step.message}
+                    </p>
+                    <div className="flex gap-1">
+                      {[0, 1, 2].map(i => (
+                        <span
+                          key={i}
+                          className="h-1.5 w-1.5 rounded-full bg-accent/60"
+                          style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </div>
       </div>
 
       <div className={cn('transition-all duration-500 ease-in-out', suggestion ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none')}>
