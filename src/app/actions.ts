@@ -4,7 +4,7 @@ import { estimateTruckRequirements, type EstimateTruckRequirementsInput } from '
 import { providePackingSuggestions, type PackingSuggestionsInput, type PackingSuggestionsOutput } from '@/ai/flows/provide-packing-suggestions';
 import { skuData } from '@/lib/sku-data';
 import type { Item, ItemWithData, EstimateTruckRequirementsOutput, TruckSuggestion, AiUsage } from '@/lib/types';
-import { incrementAiUsage, getAiUsage as readAiUsage } from '@/lib/ai-usage-tracker';
+import { getAiUsage as readAiUsage, incrementAiUsage } from '@/lib/ai-usage-tracker';
 import { z } from 'zod';
 
 export async function getAiUsage(): Promise<AiUsage> {
@@ -38,10 +38,10 @@ function getTrucksForFeet(totalLinearFeet: number): { truckType: TruckSuggestion
     if (totalLinearFeet <= 0) {
       return { truckType: 'LTL', trucksNeeded: 0, summary: 'No shipment items.' };
     }
-  
+
     const fullTrucks = Math.floor(totalLinearFeet / 48);
     const remainingFeet = totalLinearFeet % 48;
-  
+
     let overflowTruckType: 'LTL' | 'Half Truck' | 'Full Truck' | null = null;
     if (remainingFeet > 0) {
       if (remainingFeet < 14) {
@@ -52,9 +52,9 @@ function getTrucksForFeet(totalLinearFeet: number): { truckType: TruckSuggestion
         overflowTruckType = 'Full Truck';
       }
     }
-  
+
     const trucksNeeded = fullTrucks + (overflowTruckType ? 1 : 0);
-  
+
     if (fullTrucks > 0 && overflowTruckType) {
       return {
         truckType: 'Mixed',
@@ -62,25 +62,25 @@ function getTrucksForFeet(totalLinearFeet: number): { truckType: TruckSuggestion
         summary: `${fullTrucks} Full Truck(s) and 1 ${overflowTruckType}`,
       };
     }
-  
+
     if (fullTrucks > 0) {
       return { truckType: 'Full Truck', trucksNeeded: fullTrucks, summary: `${fullTrucks} Full Truck(s)` };
     }
-  
+
     if (overflowTruckType) {
       return { truckType: overflowTruckType, trucksNeeded: 1, summary: `1 ${overflowTruckType}` };
     }
-  
+
     return { truckType: 'LTL', trucksNeeded: 0, summary: 'Calculation error.' };
   }
-  
+
 
 export async function getTruckSuggestion(items: Item[]): Promise<TruckSuggestion> {
   const parsedItems = itemsSchema.safeParse(items);
   if (!parsedItems.success) {
       throw new Error("Invalid items provided.");
   }
-  
+
   const itemsWithData: ItemWithData[] = parsedItems.data.map(item => {
     const data = skuData[item.sku];
     let adjustedQuantity = item.quantity;
@@ -98,7 +98,7 @@ export async function getTruckSuggestion(items: Item[]): Promise<TruckSuggestion
         quantity: adjustedQuantity, // Passing derived unit count (boards/rolls/etc) to AI
     };
   });
-  
+
   if (itemsWithData.length === 0) {
     return {
         truckType: 'LTL',
@@ -109,9 +109,9 @@ export async function getTruckSuggestion(items: Item[]): Promise<TruckSuggestion
   }
 
   // Items that have the necessary data for the detailed packing flow
-  const itemsForPacking: PackingSuggestionsInput['items'] = itemsWithData.filter(item => 
-    item.category && 
-    (item.rollsPerPallet || item.qtyPerPallet || item.boardsPerPallet) && 
+  const itemsForPacking: PackingSuggestionsInput['items'] = itemsWithData.filter(item =>
+    item.category &&
+    (item.rollsPerPallet || item.qtyPerPallet || item.boardsPerPallet) &&
     item.palletLength &&
     item.weightLbs
   ).map(item => ({ // ensure only needed properties are passed
@@ -127,7 +127,7 @@ export async function getTruckSuggestion(items: Item[]): Promise<TruckSuggestion
   }));
 
   // Items that are missing some data and need the general estimation flow
-  const itemsForEstimation: EstimateTruckRequirementsInput['items'] = itemsWithData.filter(item => 
+  const itemsForEstimation: EstimateTruckRequirementsInput['items'] = itemsWithData.filter(item =>
     !itemsForPacking.find(p => p.sku === item.sku)
   ).map(item => ({
     sku: item.sku,
@@ -144,14 +144,14 @@ export async function getTruckSuggestion(items: Item[]): Promise<TruckSuggestion
 
     if (itemsForPacking.length > 0) {
         packingResult = await withRetry(() => providePackingSuggestions({ items: itemsForPacking }));
-        incrementAiUsage();
+        await incrementAiUsage();
     }
 
     if (itemsForEstimation.length > 0) {
         estimationResult = await withRetry(() => estimateTruckRequirements({ items: itemsForEstimation }));
-        incrementAiUsage();
+        await incrementAiUsage();
     }
-    
+
     const packingFeet = packingResult?.linearFeet ?? 0;
     const estimationFeet = estimationResult?.truckRecommendation.linearFeet ?? 0;
     const totalLinearFeet = packingFeet + estimationFeet;
@@ -163,7 +163,7 @@ export async function getTruckSuggestion(items: Item[]): Promise<TruckSuggestion
     (packingResult ? `--- Detailed Packing Plan (${packingFeet.toFixed(2)} ft) ---\n${packingResult.packingNotes}\n\n` : '') +
     (estimationResult ? `--- Additional Items Estimation (${estimationFeet.toFixed(2)} ft) ---\n${estimationResult.truckRecommendation.reasoning}`: '');
 
-    const aiUsage = readAiUsage();
+    const aiUsage = await readAiUsage();
 
     return {
         truckType,

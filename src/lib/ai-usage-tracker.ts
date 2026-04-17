@@ -1,49 +1,51 @@
-import fs from 'fs';
-import path from 'path';
+import { createClient } from 'redis';
 
-const USAGE_FILE = path.join(process.cwd(), 'ai-usage.json');
-const RPD_LIMIT = 20; // Gemini 2.5 Flash free tier
+const RPD_LIMIT = 20;
+const REDIS_KEY = 'gemini_rpd';
 
-interface UsageData {
+function getTodayString(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
+async function withRedis<T>(fn: (client: ReturnType<typeof createClient>) => Promise<T>): Promise<T> {
+  const client = createClient({ url: process.env.REDIS_URL });
+  await client.connect();
+  try {
+    return await fn(client);
+  } finally {
+    await client.disconnect();
+  }
+}
+
+interface StoredUsage {
   date: string;
   count: number;
 }
 
-function getTodayString(): string {
-  return new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
-}
-
-function readUsage(): UsageData {
-  try {
-    if (fs.existsSync(USAGE_FILE)) {
-      const raw = fs.readFileSync(USAGE_FILE, 'utf-8');
-      const data: UsageData = JSON.parse(raw);
-      if (data.date === getTodayString()) {
-        return data;
-      }
+export async function getAiUsage() {
+  return withRedis(async (client) => {
+    const today = getTodayString();
+    const raw = await client.get(REDIS_KEY);
+    let count = 0;
+    if (raw) {
+      const data: StoredUsage = JSON.parse(raw);
+      if (data.date === today) count = data.count;
     }
-  } catch {
-    // ignore read/parse errors
-  }
-  return { date: getTodayString(), count: 0 };
+    return { date: today, count, remaining: Math.max(0, RPD_LIMIT - count), limit: RPD_LIMIT };
+  });
 }
 
-function writeUsage(data: UsageData): void {
-  try {
-    fs.writeFileSync(USAGE_FILE, JSON.stringify(data), 'utf-8');
-  } catch {
-    // ignore write errors
-  }
-}
-
-export function incrementAiUsage(): UsageData & { remaining: number; limit: number } {
-  const usage = readUsage();
-  usage.count += 1;
-  writeUsage(usage);
-  return { ...usage, remaining: Math.max(0, RPD_LIMIT - usage.count), limit: RPD_LIMIT };
-}
-
-export function getAiUsage(): UsageData & { remaining: number; limit: number } {
-  const usage = readUsage();
-  return { ...usage, remaining: Math.max(0, RPD_LIMIT - usage.count), limit: RPD_LIMIT };
+export async function incrementAiUsage() {
+  return withRedis(async (client) => {
+    const today = getTodayString();
+    const raw = await client.get(REDIS_KEY);
+    let count = 0;
+    if (raw) {
+      const data: StoredUsage = JSON.parse(raw);
+      if (data.date === today) count = data.count;
+    }
+    count += 1;
+    await client.set(REDIS_KEY, JSON.stringify({ date: today, count }));
+    return { date: today, count, remaining: Math.max(0, RPD_LIMIT - count), limit: RPD_LIMIT };
+  });
 }
